@@ -2,7 +2,7 @@
 // ======================================================
 // CONFIGURATION
 // ======================================================
-$apiKey = "AIzaSyADjXSmUOuUNO43QU5Rca0e9eZ3rwrWiT8"; 
+$apiKey = "AIzaSyDKZ6GEnBHdg0RDFgs-PNXPxyK0ULSSReE"; 
 
 // ======================================================
 // CORS & HEADER SETUP
@@ -109,3 +109,4 @@ if (curl_errno($ch)) {
 }
 curl_close($ch);
 ?>
+
