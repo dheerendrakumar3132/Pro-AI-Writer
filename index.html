@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro AI Writer - Novaplexes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text {
+            background: linear-gradient(to right, #1e40af, #7e22ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .loader {
+            border-top-color: #3B82F6;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col justify-between">
+
+    <div class="flex-grow flex flex-col items-center py-12 px-4">
+
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-3 gradient-text">Pro AI Writer</h1>
+            <p class="text-slate-600 text-lg">Generate flawless Emails, Applications, Reports & Resumes instantly.</p>
+        </div>
+
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-3xl border border-slate-200">
+            
+            <div class="mb-6">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Quick Select:</p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="setTemplate('Resume')" class="px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold hover:bg-blue-100 border border-blue-200 transition">
+                        <i class="fa-solid fa-file-user mr-1"></i> Create Resume
+                    </button>
+                    <button onclick="setTemplate('Sick Leave')" class="px-4 py-2 bg-purple-50 text-purple-700 rounded-full text-sm font-semibold hover:bg-purple-100 border border-purple-200 transition">
+                        <i class="fa-solid fa-bed-pulse mr-1"></i> Sick Leave
+                    </button>
+                    <button onclick="setTemplate('Resignation Letter')" class="px-4 py-2 bg-red-50 text-red-700 rounded-full text-sm font-semibold hover:bg-red-100 border border-red-200 transition">
+                        <i class="fa-solid fa-door-open mr-1"></i> Resignation
+                    </button>
+                    <button onclick="setTemplate('Business Report')" class="px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-semibold hover:bg-green-100 border border-green-200 transition">
+                        <i class="fa-solid fa-chart-line mr-1"></i> Report
+                    </button>
+                </div>
+            </div>
+
+            <form id="aiForm" class="space-y-6">
+                
+                <div>
+                    <label class="block text-gray-800 font-bold mb-2 text-sm">
+                        What do you want to write?
+                    </label>
+                    <input type="text" id="documentType" 
+                           placeholder="E.g., Professional Email, Job Application, Resume..." 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition bg-gray-50" required>
+                </div>
+
+                <div>
+                    <label class="block text-gray-800 font-bold mb-2 text-sm">
+                        Provide Details (Key Points)
+                    </label>
+                    <textarea id="userContext" rows="5" 
+                              placeholder="E.g., My name is Dheeraj, I have 3 years of experience in Web Development. Skills: HTML, PHP..." 
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition bg-gray-50" required></textarea>
+                </div>
+
+                <button type="submit" id="generateBtn" 
+                        class="w-full bg-slate-900 text-white font-bold py-4 rounded-lg hover:bg-slate-800 shadow-lg transform transition active:scale-95 flex justify-center items-center">
+                    <i class="fa-solid fa-pen-fancy mr-2"></i> Generate Content
+                </button>
+            </form>
+
+            <div id="loadingArea" class="hidden mt-8 text-center py-6">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-10 w-10 mb-4 mx-auto"></div>
+                <h2 class="text-gray-600 font-medium animate-pulse">Analyzing grammar & generating content...</h2>
+            </div>
+
+            <div id="resultArea" class="hidden mt-8 pt-6 border-t border-gray-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">Your Draft:</h3>
+                    <button onclick="copyText()" class="text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold py-2 px-4 rounded border border-blue-200 transition flex items-center">
+                        <i class="fa-regular fa-copy mr-2"></i> <span id="copyBtnText">Copy</span>
+                    </button>
+                </div>
+
+                <div class="relative group">
+                    <div id="outputText" class="w-full bg-white p-6 rounded-lg border border-gray-300 text-gray-800 leading-relaxed whitespace-pre-wrap shadow-inner font-serif text-base">
+                        </div>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="location.reload()" class="text-slate-500 hover:text-slate-800 text-sm font-medium underline decoration-dotted">
+                        Start New Draft
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-gray-200 py-6 mt-10">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-600 font-medium">© 2026 Novaplexes. All rights reserved.</p>
+            <p class="text-gray-400 text-sm mt-1">Designed & Developed by <span class="text-blue-600 font-semibold">Dheerendra Patel</span></p>
+            <div class="mt-3 space-x-4">
+                <a href="https://wa.me/919140092735" class="text-gray-400 hover:text-blue-600 transition"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.instagram.com/web__dev_dheerendrapatel?igsh=MW1neGo5MDQ1YTgxMQ==" class="text-gray-400 hover:text-blue-600 transition"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.equafusion.com/" class="text-gray-400 hover:text-blue-600 transition"><i class="fa-solid fa-globe"></i></a>
+            </div>
+            <div class="mt-4">
+    <a href="privacy policy.html" class="text-gray-400 hover:text-gray-600 text-xs underline">Privacy Policy</a>
+<a href="terms & conditions.html" class="text-gray-400 hover:text-gray-600 text-xs underline">Terms & Conditions</a>
+<a href="disclaimer.html" class="text-gray-400 hover:text-gray-600 text-xs underline">Disclaimer</a>
+<a href="cookie policy.html" class="text-gray-400 hover:text-gray-600 text-xs underline">Cookie Policy</a>
+        </div>
+    </footer>
+
+    <script>
+        // Template Quick Fill Logic
+        function setTemplate(type) {
+            const docInput = document.getElementById('documentType');
+            const contextInput = document.getElementById('userContext');
+            
+            docInput.value = type;
+            
+            if(type === 'Resume') {
+                contextInput.value = "Name: \nPhone/Email: \n\nProfessional Summary: \n\nWork Experience (Role, Company, Year): \n1. \n2. \n\nEducation: \n\nSkills: ";
+                contextInput.focus();
+            } else if (type === 'Sick Leave') {
+                contextInput.value = "Reason for leave: High Fever\nDuration: 2 Days\nDates: Tomorrow to Day After Tomorrow";
+            }
+        }
+
+        const form = document.getElementById('aiForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingArea = document.getElementById('loadingArea');
+        const resultArea = document.getElementById('resultArea');
+        const outputText = document.getElementById('outputText');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...';
+            loadingArea.classList.remove('hidden');
+            resultArea.classList.add('hidden');
+
+            const docType = document.getElementById('documentType').value;
+            const context = document.getElementById('userContext').value;
+
+            try {
+                // Ensure backend.php is in the same folder
+                const response = await fetch('backend.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `documentType=${encodeURIComponent(docType)}&userContext=${encodeURIComponent(context)}`
+                });
+
+                const data = await response.text();
+                outputText.innerHTML = data;
+                
+                loadingArea.classList.add('hidden');
+                resultArea.classList.remove('hidden');
+
+                // Smooth scroll to result
+                resultArea.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                alert("Connection Error. Please check your internet.");
+                loadingArea.classList.add('hidden');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fa-solid fa-pen-fancy mr-2"></i> Generate Content';
+            }
+        });
+
+        function copyText() {
+            const textToCopy = outputText.innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btnText = document.getElementById('copyBtnText');
+                btnText.innerText = "Copied!";
+                setTimeout(() => btnText.innerText = "Copy", 2000);
+            });
+        }
+    </script>
+</body>
+</html>
