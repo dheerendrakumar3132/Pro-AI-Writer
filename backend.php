@@ -1,66 +1,69 @@
 <?php
 // ======================================================
-// 1. CONFIGURATION (AIzaSyADjXSmUOuUNO43QU5Rca0e9eZ3rwrWiT8)
+// CONFIGURATION
 // ======================================================
-$apiKey = "AIzaSyADjXSmUOuUNO43QU5Rca0e9eZ3rwrWiT8";
+$apiKey = "AIzaSyADjXSmUOuUNO43QU5Rca0e9eZ3rwrWiT8"; 
 
 // ======================================================
-// 2. SETUP & HEADERS (छेड़छाड़ न करें)
+// CORS & HEADER SETUP
 // ======================================================
-
-// Cross-Origin Resource Sharing (CORS) - ताकि कोई एरर न आए
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: text/plain; charset=UTF-8");
 
-// सिर्फ POST रिक्वेस्ट ही स्वीकार करें
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    http_response_code(405);
-    echo "Error: Only POST method is allowed.";
+// Handle Pre-flight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
     exit;
 }
 
 // ======================================================
-// 3. INPUT HANDLING
+// DATA HANDLING
 // ======================================================
 
-// Frontend से डेटा लेना
+// Block direct GET access
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    echo "Server is running. Please use the website form to send data.";
+    exit;
+}
+
 $docType = isset($_POST['documentType']) ? trim($_POST['documentType']) : '';
 $userContext = isset($_POST['userContext']) ? trim($_POST['userContext']) : '';
 
-// अगर खाली है तो रोक दें
-if (empty($docType) || empty($userContext)) {
-    echo "Error: Please provide both the Topic and Details.";
+// Create query
+$fullQuery = "Topic/Type: " . $docType . ". Details: " . $userContext;
+
+if (empty($docType) && empty($userContext)) {
+    echo "Error: Empty input.";
     exit;
 }
 
 // ======================================================
-// 4. PROMPT ENGINEERING (AI का दिमाग)
+// AI PROMPT INSTRUCTIONS
 // ======================================================
 
-// यह AI को बताता है कि उसे कैसे व्यवहार करना है
 $prompt = "
-You are an expert Professional Writer and HR Specialist working for Novaplexes.
-Your Task: Write a professional document based on the following details.
+You are a highly intelligent AI Assistant for Novaplexes.
+User Request: $fullQuery
 
-Details provided by user:
-- Document Type: $docType
-- Context/Key Points: $userContext
+INSTRUCTIONS:
+1. If the user asks for a Document (Resume, Email, Application, Report):
+   - Write it in a strictly PROFESSIONAL format.
+   - Use proper English.
+   - Do not include markdown formatting like ** or ##.
 
-STRICT RULES:
-1. Language: Write STRICTLY IN ENGLISH only. Do not use any other language.
-2. Grammar: Must be flawless, professional, and grammatically correct.
-3. Formatting: 
-   - Do NOT use Markdown symbols like ** (bold) or ## (headings). 
-   - Use plain text with proper spacing and indentation.
-   - If it is a Resume/CV, organize it clearly with headers.
-   - If it is an Email, include a Subject Line.
-4. Tone: Polite, formal, and persuasive.
-5. Content: Do not include conversational filler like 'Here is the draft'. Just output the document text directly.
+2. If the user asks a General Question (Search, Info, Coding):
+   - Answer the question accurately.
+   - Provide a direct answer.
+
+3. General Rules:
+   - Output ONLY the result text.
+   - No conversational fillers.
 ";
 
 // ======================================================
-// 5. API CALL (GOOGLE GEMINI)
+// API CALL (GOOGLE GEMINI)
 // ======================================================
 
 $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
@@ -75,18 +78,17 @@ $data = [
     ]
 ];
 
-// cURL Setup (Shared Hosting Friendly)
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // SSL एरर रोकने के लिए
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 $response = curl_exec($ch);
 
 // ======================================================
-// 6. RESPONSE HANDLING
+// OUTPUT PROCESSING
 // ======================================================
 
 if (curl_errno($ch)) {
@@ -94,20 +96,16 @@ if (curl_errno($ch)) {
 } else {
     $responseData = json_decode($response, true);
     
-    // Check if valid content exists
     if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
-        $generatedText = $responseData['candidates'][0]['content']['parts'][0]['text'];
+        $text = $responseData['candidates'][0]['content']['parts'][0]['text'];
         
-        // Final clean up (Extra safety to remove Markdown if AI ignores rules)
-        $cleanText = str_replace(['**', '##', '```'], '', $generatedText);
+        // Remove markdown symbols for clean text
+        $cleanText = str_replace(['**', '##', '```'], '', $text);
         
         echo $cleanText;
     } else {
-        // अगर API Key गलत है या कोटा खत्म हो गया है
-        echo "System Error: Unable to generate text. Please check your API Key or Quota.";
+        echo "API Error: Unable to generate result.";
     }
 }
-
 curl_close($ch);
-
 ?>
