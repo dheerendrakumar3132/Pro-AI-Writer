@@ -1,6 +1,6 @@
 <?php
 // ======================================================
-// 1. CONFIGURATION (अपनी API Key यहाँ पेस्ट करें)
+// 1. CONFIGURATION (AIzaSyADjXSmUOuUNO43QU5Rca0e9eZ3rwrWiT8)
 // ======================================================
 $apiKey = "AIzaSyADjXSmUOuUNO43QU5Rca0e9eZ3rwrWiT8";
 
@@ -109,4 +109,5 @@ if (curl_errno($ch)) {
 }
 
 curl_close($ch);
+
 ?>
